@@ -11,6 +11,9 @@ import aiRoutes from './routes/aiRoutes';
 
 const app: Application = express();
 
+// Trust proxy for rate limiting on Render/Vercel
+app.set('trust proxy', 1);
+
 // Security Middlewares
 app.use(helmet());
 app.use(cors({

@@ -52,8 +52,8 @@ const EditTaskModal: React.FC<EditTaskModalProps> = ({
       reset({
         title: task.title,
         description: task.description || '',
-        priority: task.priority as any,
-        status: task.status as any,
+        priority: task.priority as 'low' | 'medium' | 'high' | 'urgent',
+        status: task.status as 'To Do' | 'In Progress' | 'Done' | 'Review',
         dueDate: task.dueDate ? new Date(task.dueDate).toISOString().split('T')[0] : '',
         assignee: (task.assignee as any)?._id || (task.assignee as string) || '',
       });
@@ -138,7 +138,7 @@ const EditTaskModal: React.FC<EditTaskModalProps> = ({
                             <div
                               key={status}
                               onClick={() => {
-                                setValue('status', status);
+                                setValue('status', status as 'To Do' | 'In Progress' | 'Review' | 'Done');
                                 setActiveDropdown(null);
                               }}
                               className={`px-4 py-2.5 text-xs font-bold cursor-pointer transition-colors flex items-center justify-between ${
@@ -178,7 +178,7 @@ const EditTaskModal: React.FC<EditTaskModalProps> = ({
                             <div
                               key={priority}
                               onClick={() => {
-                                setValue('priority', priority);
+                                setValue('priority', priority as 'low' | 'medium' | 'high' | 'urgent');
                                 setActiveDropdown(null);
                               }}
                               className={`px-4 py-2.5 text-xs font-bold capitalize cursor-pointer transition-colors flex items-center justify-between ${

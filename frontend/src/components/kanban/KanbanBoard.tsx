@@ -39,7 +39,7 @@ const KanbanBoard: React.FC<KanbanBoardProps> = ({ tasks, workspaceId, onTaskCli
 
       return { previousTasks };
     },
-    onError: (err, newOrder, context) => {
+    onError: (_err, _newOrder, context) => {
       queryClient.setQueryData(['tasks', workspaceId], context?.previousTasks);
     },
     onSettled: () => {
@@ -58,7 +58,7 @@ const KanbanBoard: React.FC<KanbanBoardProps> = ({ tasks, workspaceId, onTaskCli
       });
       return { previousTasks };
     },
-    onError: (err: any, { id: deletedId }, context) => {
+    onError: (err: any, _variables, context) => {
       queryClient.setQueryData(['tasks', workspaceId], context?.previousTasks);
       toast.error(`Failed to delete task: ${err.response?.data?.message || err.message}`);
     },
@@ -129,9 +129,9 @@ const KanbanBoard: React.FC<KanbanBoardProps> = ({ tasks, workspaceId, onTaskCli
                               initial={{ opacity: 0, scale: 0.8 }}
                               animate={{ opacity: 1, scale: 1 }}
                               exit={{ opacity: 0, scale: 0.5, transition: { duration: 0.2 } }}
+                              {...(provided.draggableProps as any)}
+                              {...(provided.dragHandleProps as any)}
                               ref={provided.innerRef}
-                              {...provided.draggableProps}
-                              {...provided.dragHandleProps}
                               onClick={() => onTaskClick(task)}
                               className={`mb-3 glass-panel p-4 rounded-lg cursor-pointer active:cursor-grabbing transition-all ${
                                 snapshot.isDragging ? 'shadow-2xl ring-2 ring-primary-500 scale-105' : 'hover:shadow-lg hover:border-primary-200 dark:hover:border-primary-900/50 hover:-translate-y-1'

@@ -22,10 +22,15 @@ export interface Task {
   _id: string;
   title: string;
   description?: string;
-  status: string;
+  status: 'To Do' | 'In Progress' | 'Done' | 'Review' | string;
   priority: 'low' | 'medium' | 'high' | 'urgent';
   workspaceId: string;
   assignee?: User;
   order: number;
   tags: string[];
+  subtasks?: { title: string; completed: boolean }[];
+  dueDate?: string;
+  createdAt?: string;
+  updatedAt?: string;
+  createdBy?: User;
 }

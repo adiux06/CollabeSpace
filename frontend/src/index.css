@@ -1,0 +1,228 @@
+@import "tailwindcss";
+
+@custom-variant dark (&:where(.dark, .dark *));
+
+@theme {
+  --color-primary-50: #f0fdfa;
+  --color-primary-100: #ccfbf1;
+  --color-primary-500: #14b8a6;
+  --color-primary-600: #0d9488;
+  --color-primary-700: #0f766e;
+  --color-primary-900: #134e4a;
+
+  --color-dark-bg: #0f172a;
+  --color-dark-card: #1e293b;
+  --color-dark-border: #334155;
+  --color-dark-text: #f8fafc;
+  --color-dark-muted: #94a3b8;
+}
+
+@layer base {
+  body {
+    @apply bg-gray-50 text-gray-900 dark:bg-dark-bg dark:text-dark-text transition-colors duration-200;
+  }
+}
+
+.glass-panel {
+  @apply bg-white/70 dark:bg-dark-card/70 backdrop-blur-md border border-white/20 dark:border-dark-border shadow-xl;
+}
+
+.custom-scrollbar::-webkit-scrollbar {
+  width: 6px;
+  height: 6px;
+}
+
+.custom-scrollbar::-webkit-scrollbar-track {
+  background: transparent;
+}
+
+.custom-scrollbar::-webkit-scrollbar-thumb {
+  @apply bg-gray-300 dark:bg-gray-600 rounded-full;
+}
+
+/* View Transitions for Theme Expanding Circle */
+::view-transition-old(root),
+::view-transition-new(root) {
+  animation: none;
+  mix-blend-mode: normal;
+}
+::view-transition-old(root) {
+  z-index: 0;
+}
+::view-transition-new(root) {
+  z-index: 1;
+}
+
+/* Minecraft Redstone Lamp Theme Toggle (From Uiverse.io by preet_7613) */
+.mc-theme-checkbox {
+  position: absolute;
+  opacity: 0;
+}
+
+.mc-container {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  position: relative;
+  cursor: pointer;
+  user-select: none;
+  perspective: 1000px;
+}
+
+.mc-lamp-block {
+  position: relative;
+  width: 100px;
+  height: 100px;
+  transform-style: preserve-3d;
+  transform: rotateX(-30deg) rotateY(45deg);
+  transition: transform 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+}
+
+.mc-face {
+  position: absolute;
+  width: 100px;
+  height: 100px;
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  grid-template-rows: repeat(4, 1fr);
+  border: 5px solid #78350f; /* Bright amber/terracotta border */
+  box-sizing: border-box;
+  background: #78350f;
+}
+
+.mc-face div {
+  width: 100%;
+  height: 100%;
+  background-color: #b45309; /* Bright earthy brown pixels */
+  border: 1px solid rgba(0, 0, 0, 0.15);
+}
+
+.mc-top { transform: rotateX(90deg) translateZ(50px); }
+.mc-bottom { transform: rotateX(-90deg) translateZ(50px); }
+.mc-front { transform: rotateY(0deg) translateZ(50px); }
+.mc-back { transform: rotateY(180deg) translateZ(50px); }
+.mc-left { transform: rotateY(-90deg) translateZ(50px); }
+.mc-right { transform: rotateY(90deg) translateZ(50px); }
+
+.mc-face div:nth-child(3n) { filter: brightness(110%); }
+.mc-face div:nth-child(7n) { filter: brightness(80%); }
+
+.mc-theme-checkbox:checked ~ .mc-lamp-block .mc-face {
+  border-color: #5b3a24;
+  filter: drop-shadow(0px 0px 25px rgba(255, 174, 66, 0.5));
+}
+
+.mc-theme-checkbox:checked ~ .mc-lamp-block .mc-face div {
+  background-color: #e58d4a;
+  border-color: rgba(255, 255, 255, 0.1);
+}
+
+.mc-theme-checkbox:checked ~ .mc-lamp-block .mc-face div:nth-child(3n) {
+  background-color: #f6b17a;
+}
+
+.mc-theme-checkbox:checked ~ .mc-lamp-block .mc-face div:nth-child(7n) {
+  background-color: #b56732;
+}
+
+.mc-container:hover .mc-lamp-block {
+  transform: rotateX(-30deg) rotateY(55deg);
+}
+
+.mc-container:active .mc-lamp-block {
+  transform: rotateX(-30deg) rotateY(45deg) scale(0.9);
+}
+
+/* Animated Hamburger Menu (From Uiverse.io by dugepard - Modified) */
+.hamburger-check {
+  display: none;
+}
+
+.hamburger-button {
+  position: relative;
+  display: inline-block;
+  width: 70px;
+  height: 50px;
+  cursor: pointer;
+}
+
+.hamburger-button div {
+  width: 70px;
+  height: 8px; /* Slightly thinner for crispness */
+  background-color: currentColor; /* Matches page theme */
+  border-radius: 4px;
+  position: absolute;
+  transition: 0.4s;
+}
+
+.hamburger-line1 { top: 0; }
+.hamburger-line2 { top: 40%; }
+.hamburger-line3 { top: 80%; }
+
+.hamburger-button:hover div {
+  width: 54.2857143%;
+}
+
+.hamburger-button:hover .hamburger-line1 {
+  transform: translate(31.5px, 12px) rotate(35deg);
+  border-radius: 7px;
+  border-top-right-radius: 10px;
+  border-bottom-right-radius: 10px;
+}
+
+.hamburger-button:hover .hamburger-line3 {
+  transform: translate(31.5px, -12px) rotate(-35deg);
+  border-radius: 7px;
+  border-top-right-radius: 10px;
+  border-bottom-right-radius: 10px;
+}
+
+.hamburger-check:checked ~ .hamburger-button:hover .hamburger-line1 {
+  transform: translate(0, 12px) rotate(-35deg);
+  border-radius: 7px;
+  border-top-left-radius: 10px;
+  border-bottom-left-radius: 10px;
+}
+
+.hamburger-check:checked ~ .hamburger-button:hover .hamburger-line3 {
+  transform: translate(0, -12px) rotate(35deg);
+  border-radius: 7px;
+  border-top-left-radius: 10px;
+  border-bottom-left-radius: 10px;
+}
+
+.hamburger-check:checked ~ .hamburger-button:hover .hamburger-line2 {
+  margin-left: 32px;
+}
+
+/* Rotating Settings Icon Animation (From Uiverse.io by thomas-m-njuguna) */
+.settings-icon-animate {
+  transition: transform 0.4s ease-in-out;
+}
+
+.group:hover .settings-icon-animate {
+  transform: rotate(60deg);
+}
+
+.group:active .settings-icon-animate {
+  animation: settings-rot 1s linear infinite;
+}
+
+@keyframes settings-rot {
+  from {
+    transform: rotate(0deg);
+  }
+  to {
+    transform: rotate(360deg);
+  }
+}
+
+/* Generic Hover Animation for Other Sidebar Icons */
+.sidebar-icon-animate {
+  transition: transform 0.3s cubic-bezier(0.34, 1.56, 0.64, 1);
+}
+
+.group:hover .sidebar-icon-animate {
+  transform: scale(1.15) translateY(-1px);
+}
+

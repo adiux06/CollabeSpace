@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import { useState, useEffect } from 'react';
 import { useQuery, useMutation, useQueryClient } from 'react-query';
 import { Plus } from 'lucide-react';
 import { useAuthStore } from '../../store/authStore';
@@ -6,7 +6,7 @@ import { useUIStore } from '../../store/uiStore';
 import KanbanBoard from '../kanban/KanbanBoard';
 import CreateTaskModal from '../kanban/CreateTaskModal';
 import EditTaskModal from '../kanban/EditTaskModal';
-import { fetchTasks, createTask, updateTask, deleteTask } from '../../api/taskApi';
+import { fetchTasks, createTask, updateTask, deleteTask, duplicateTask } from '../../api/taskApi';
 import api from '../../api/client';
 import { toast } from 'react-hot-toast';
 import ConfirmModal from '../common/ConfirmModal';
@@ -122,10 +122,6 @@ const DashboardHome = () => {
     };
   }, [socket, queryClient, workspaceId]);
 
-  const onDragEnd = (result: DropResult) => {
-    // We will let KanbanBoard handle the mutation, we just need to pass the tasks.
-    // For now, this is just a placeholder, the actual logic goes to KanbanBoard component.
-  };
 
   const handleCreateTask = async (data: any) => {
     let currentWorkspaceId = workspaceId;

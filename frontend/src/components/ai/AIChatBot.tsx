@@ -1,6 +1,6 @@
-import React, { useState, useRef, useEffect } from 'react';
+import { useState, useRef, useEffect } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
-import { MessageSquare, X, Send, Sparkles, Bot, User, Minimize2, Maximize2 } from 'lucide-react';
+import { MessageSquare, X, Send, Sparkles, Bot, User, Minimize2 } from 'lucide-react';
 import { chatWithAI } from '../../api/taskApi';
 import api from '../../api/client';
 import { useQuery } from 'react-query';

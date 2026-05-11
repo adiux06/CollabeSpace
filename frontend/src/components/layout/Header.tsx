@@ -1,4 +1,3 @@
-import React from 'react';
 import { useAuthStore } from '../../store/authStore';
 import { useUIStore } from '../../store/uiStore';
 import { Bell } from 'lucide-react';
@@ -9,7 +8,7 @@ import UserMenu from './UserMenu';
 const Header = () => {
   const { user } = useAuthStore();
   const { 
-    theme, toggleTheme, toggleSidebar, sidebarOpen, 
+    toggleSidebar, sidebarOpen, 
     isNotificationsOpen, setNotificationsOpen, notifications,
     isUserMenuOpen, setUserMenuOpen
   } = useUIStore();

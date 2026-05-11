@@ -1,9 +1,8 @@
-import React from 'react';
 import { useUIStore } from '../../store/uiStore';
 import { Bell, CheckCircle2, AlertCircle, Info, Clock } from 'lucide-react';
 
 const NotificationDropdown = () => {
-  const { notifications, markAllNotificationsAsRead, setNotificationsOpen } = useUIStore();
+  const { notifications, markAllNotificationsAsRead } = useUIStore();
 
   const getIcon = (type: string) => {
     switch (type) {

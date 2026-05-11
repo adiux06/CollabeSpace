@@ -92,6 +92,7 @@ For more detailed information, please refer to the files in the `docs/` director
 - [Setup Guide](docs/SETUP.md)
 - [API Documentation](docs/API.md)
 - [Architecture Overview](docs/ARCHITECTURE.md)
+- [Deployment Guide](docs/DEPLOYMENT.md)
 
 ## License
 

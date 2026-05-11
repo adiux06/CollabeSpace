@@ -19,7 +19,12 @@ app.use(helmet());
 app.use(cors({
   origin: (origin, callback) => {
     const allowedOrigins = ['http://localhost:5173', 'http://localhost:5174', process.env.FRONTEND_URL].filter(Boolean);
-    if (!origin || allowedOrigins.some(allowed => origin === allowed || origin === `${allowed}/`)) {
+    
+    // Allow if it matches allowed origins OR if it's any vercel.app subdomain
+    const isVercel = origin && origin.endsWith('.vercel.app');
+    const isAllowed = !origin || allowedOrigins.some(allowed => origin === allowed || origin === `${allowed}/`);
+
+    if (isAllowed || isVercel) {
       callback(null, true);
     } else {
       callback(new Error('Not allowed by CORS'));

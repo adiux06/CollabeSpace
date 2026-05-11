@@ -2,19 +2,14 @@ import { useState } from 'react';
 import { useQuery } from 'react-query';
 import { motion } from 'framer-motion';
 import { 
-  CheckCircle2, 
-  Clock, 
-  AlertCircle, 
-  ArrowUpCircle, 
   Calendar, 
+  ArrowUpCircle,
   Tag, 
   MoreVertical,
   ChevronRight,
   Layout,
   List as ListIcon,
-  Search,
-  Filter,
-  Check
+  Search
 } from 'lucide-react';
 import { fetchMyTasks, updateTask, deleteTask, duplicateTask } from '../../api/taskApi';
 import EditTaskModal from '../kanban/EditTaskModal';

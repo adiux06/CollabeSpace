@@ -11,14 +11,14 @@ interface CommentListProps {
   workspaceId: string;
 }
 
-const CommentList: React.FC<CommentListProps> = ({ taskId, workspaceId }) => {
+const CommentList: React.FC<CommentListProps> = ({ taskId }) => {
   const { user } = useAuthStore();
   const { socket } = useSocket();
   const [comments, setComments] = useState<any[]>([]);
   const [newComment, setNewComment] = useState('');
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [isTyping, setIsTyping] = useState<string | null>(null);
-  const typingTimeoutRef = useRef<NodeJS.Timeout | null>(null);
+  const typingTimeoutRef = useRef<any>(null);
   const commentsEndRef = useRef<HTMLDivElement>(null);
 
   const scrollToBottom = () => {
@@ -79,7 +79,7 @@ const CommentList: React.FC<CommentListProps> = ({ taskId, workspaceId }) => {
 
     setIsSubmitting(true);
     try {
-      const comment = await addComment(taskId, newComment.trim());
+      await addComment(taskId, newComment.trim());
       // We don't manually add it here because the socket event will handle it for consistency
       setNewComment('');
     } catch (error) {

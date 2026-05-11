@@ -1,4 +1,3 @@
-import React from 'react';
 import { motion } from 'framer-motion';
 import { useAuthStore } from '../../store/authStore';
 import { useUIStore } from '../../store/uiStore';
@@ -7,7 +6,7 @@ import ThemeToggle from '../layout/ThemeToggle';
 
 const Settings = () => {
   const { user } = useAuthStore();
-  const { theme, toggleTheme } = useUIStore();
+  const { theme } = useUIStore();
 
   return (
     <motion.div

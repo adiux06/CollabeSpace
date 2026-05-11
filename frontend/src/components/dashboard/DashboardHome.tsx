@@ -11,7 +11,6 @@ import api from '../../api/client';
 import { toast } from 'react-hot-toast';
 import ConfirmModal from '../common/ConfirmModal';
 import { useSocket } from '../../contexts/SocketContext';
-import type { DropResult } from '@hello-pangea/dnd';
 import type { Task } from '../../types';
 
 const DashboardHome = () => {

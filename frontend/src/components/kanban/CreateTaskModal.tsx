@@ -4,7 +4,6 @@ import { useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { z } from 'zod';
 import { X, ChevronDown, Check } from 'lucide-react';
-import type { Task } from '../../types';
 
 const taskSchema = z.object({
   title: z.string().min(1, 'Title is required'),

@@ -6,7 +6,7 @@ import { z } from 'zod';
 import { 
   X, Trash2, Copy, Save, Calendar, User as UserIcon, 
   Tag, Folder, Clock, CheckSquare, Plus, MessageSquare,
-  ChevronDown, AlertCircle, Check
+  ChevronDown, Check
 } from 'lucide-react';
 import { format } from 'date-fns';
 import { useAuthStore } from '../../store/authStore';

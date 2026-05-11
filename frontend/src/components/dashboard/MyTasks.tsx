@@ -4,6 +4,7 @@ import { motion } from 'framer-motion';
 import { 
   Calendar, 
   ArrowUpCircle,
+  AlertCircle,
   Tag, 
   MoreVertical,
   ChevronRight,

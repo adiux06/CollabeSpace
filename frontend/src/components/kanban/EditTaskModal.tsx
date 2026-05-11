@@ -55,7 +55,7 @@ const EditTaskModal: React.FC<EditTaskModalProps> = ({
         priority: task.priority as 'low' | 'medium' | 'high' | 'urgent',
         status: task.status as 'To Do' | 'In Progress' | 'Done' | 'Review',
         dueDate: task.dueDate ? new Date(task.dueDate).toISOString().split('T')[0] : '',
-        assignee: (task.assignee as any)?._id || (task.assignee as string) || '',
+        assignee: (task.assignee as any)?._id || (task.assignee as any) || '',
       });
       setSubtasks(task.subtasks || []);
     }

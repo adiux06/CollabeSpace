@@ -1,5 +1,5 @@
 import { useState } from 'react';
-import { useQuery } from 'react-query';
+import { useQuery } from '@tanstack/react-query';
 import { motion } from 'framer-motion';
 import { 
   Calendar, 
@@ -14,7 +14,7 @@ import {
 } from 'lucide-react';
 import { fetchMyTasks, updateTask, deleteTask, duplicateTask } from '../../api/taskApi';
 import EditTaskModal from '../kanban/EditTaskModal';
-import { useMutation, useQueryClient } from 'react-query';
+import { useMutation, useQueryClient } from '@tanstack/react-query';
 import { toast } from 'react-hot-toast';
 import type { Task } from '../../types';
 
@@ -62,7 +62,7 @@ const getStatusStyles = (status: string) => {
 
 const MyTasks = () => {
   const queryClient = useQueryClient();
-  const { data: tasks = [], isLoading, error } = useQuery('myTasks', fetchMyTasks);
+  const { data: tasks = [], isLoading, error } = useQuery({ queryKey: ['myTasks'], queryFn: fetchMyTasks });
   const [editingTask, setEditingTask] = useState<Task | null>(null);
   
   // Filtering & View State
@@ -79,38 +79,32 @@ const MyTasks = () => {
     return matchesSearch && matchesPriority && matchesStatus;
   });
 
-  const editMutation = useMutation(
-    (data: { id: string; updates: Partial<Task> }) => updateTask(data.id, data.updates),
-    {
-      onSuccess: () => {
-        queryClient.invalidateQueries('myTasks');
-        setEditingTask(null);
-        toast.success('Task updated successfully');
-      },
-    }
-  );
+  const editMutation = useMutation({
+    mutationFn: (data: { id: string; updates: Partial<Task> }) => updateTask(data.id, data.updates),
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['myTasks'] });
+      setEditingTask(null);
+      toast.success('Task updated successfully');
+    },
+  });
 
-  const deleteMutation = useMutation(
-    (id: string) => deleteTask({ id, workspaceId: (editingTask as any).workspaceId?._id || '' }),
-    {
-      onSuccess: () => {
-        queryClient.invalidateQueries('myTasks');
-        setEditingTask(null);
-        toast.success('Task deleted successfully');
-      },
-    }
-  );
+  const deleteMutation = useMutation({
+    mutationFn: (id: string) => deleteTask({ id, workspaceId: (editingTask as any).workspaceId?._id || '' }),
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['myTasks'] });
+      setEditingTask(null);
+      toast.success('Task deleted successfully');
+    },
+  });
 
-  const duplicateMutation = useMutation(
-    (id: string) => duplicateTask(id, (editingTask as any).workspaceId?._id || (editingTask as any).workspaceId),
-    {
-      onSuccess: () => {
-        queryClient.invalidateQueries('myTasks');
-        setEditingTask(null);
-        toast.success('Task duplicated');
-      },
-    }
-  );
+  const duplicateMutation = useMutation({
+    mutationFn: (id: string) => duplicateTask(id, (editingTask as any).workspaceId?._id || (editingTask as any).workspaceId),
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['myTasks'] });
+      setEditingTask(null);
+      toast.success('Task duplicated');
+    },
+  });
 
   const handleUpdateTask = (data: any) => {
     if (editingTask) {
@@ -397,7 +391,7 @@ const MyTasks = () => {
         onSubmit={handleUpdateTask}
         onDelete={handleDeleteTask}
         onDuplicate={handleDuplicateTask}
-        isSubmitting={editMutation.isLoading || duplicateMutation.isLoading}
+        isSubmitting={editMutation.isPending || duplicateMutation.isPending}
       />
     </div>
   );

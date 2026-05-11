@@ -1,7 +1,7 @@
 import React from 'react';
 import { DragDropContext, Droppable, Draggable } from '@hello-pangea/dnd';
 import { motion, AnimatePresence } from 'framer-motion';
-import { useMutation, useQueryClient } from 'react-query';
+import { useMutation, useQueryClient } from '@tanstack/react-query';
 import { Trash2 } from 'lucide-react';
 import { updateTaskOrder, deleteTask } from '../../api/taskApi';
 import { toast } from 'react-hot-toast';
@@ -21,9 +21,10 @@ const KanbanBoard: React.FC<KanbanBoardProps> = ({ tasks, workspaceId, onTaskCli
   const queryClient = useQueryClient();
   const [taskToDelete, setTaskToDelete] = React.useState<string | null>(null);
 
-  const updateOrderMutation = useMutation(updateTaskOrder, {
+  const updateOrderMutation = useMutation({
+    mutationFn: updateTaskOrder,
     onMutate: async (newOrder) => {
-      await queryClient.cancelQueries(['tasks', workspaceId]);
+      await queryClient.cancelQueries({ queryKey: ['tasks', workspaceId] });
       const previousTasks = queryClient.getQueryData<Task[]>(['tasks', workspaceId]);
 
       // Optimistically update
@@ -43,13 +44,14 @@ const KanbanBoard: React.FC<KanbanBoardProps> = ({ tasks, workspaceId, onTaskCli
       queryClient.setQueryData(['tasks', workspaceId], context?.previousTasks);
     },
     onSettled: () => {
-      queryClient.invalidateQueries(['tasks', workspaceId]);
+      queryClient.invalidateQueries({ queryKey: ['tasks', workspaceId] });
     },
   });
 
-  const deleteMutation = useMutation(deleteTask, {
+  const deleteMutation = useMutation({
+    mutationFn: deleteTask,
     onMutate: async ({ id: deletedId }) => {
-      await queryClient.cancelQueries(['tasks', workspaceId]);
+      await queryClient.cancelQueries({ queryKey: ['tasks', workspaceId] });
       const previousTasks = queryClient.getQueryData<Task[]>(['tasks', workspaceId]);
       
       queryClient.setQueryData<Task[]>(['tasks', workspaceId], (old) => {
@@ -63,7 +65,7 @@ const KanbanBoard: React.FC<KanbanBoardProps> = ({ tasks, workspaceId, onTaskCli
       toast.error(`Failed to delete task: ${err.response?.data?.message || err.message}`);
     },
     onSettled: () => {
-      queryClient.invalidateQueries(['tasks', workspaceId]);
+      queryClient.invalidateQueries({ queryKey: ['tasks', workspaceId] });
       toast.success('Task deleted successfully');
     },
   });

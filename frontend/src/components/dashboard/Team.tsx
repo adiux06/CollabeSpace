@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { useQuery, useMutation, useQueryClient } from 'react-query';
+import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { motion } from 'framer-motion';
 import { Mail, Shield, User as UserIcon, Loader2, Plus, Users } from 'lucide-react';
 import api from '../../api/client';
@@ -12,39 +12,40 @@ const Team = () => {
   const [inviteRole, setInviteRole] = useState('member');
 
   // Fetch workspaces to get active workspace ID
-  const { data: workspaces, isLoading: wsLoading } = useQuery('workspaces', async () => {
-    const res = await api.get('/workspaces');
-    return res.data;
+  const { data: workspaces, isLoading: wsLoading } = useQuery({
+    queryKey: ['workspaces'],
+    queryFn: async () => {
+      const res = await api.get('/workspaces');
+      return res.data;
+    }
   });
 
   const activeWorkspaceId = workspaces?.[0]?._id;
 
   // Fetch detailed workspace including populated members
-  const { data: workspace, isLoading: detailsLoading } = useQuery(
-    ['workspace', activeWorkspaceId],
-    async () => {
+  const { data: workspace, isLoading: detailsLoading } = useQuery({
+    queryKey: ['workspace', activeWorkspaceId],
+    queryFn: async () => {
       const res = await api.get(`/workspaces/${activeWorkspaceId}`);
       return res.data;
     },
-    { enabled: !!activeWorkspaceId }
-  );
+    enabled: !!activeWorkspaceId
+  });
 
-  const inviteMutation = useMutation(
-    async (inviteData: { email: string; role: string }) => {
+  const inviteMutation = useMutation({
+    mutationFn: async (inviteData: { email: string; role: string }) => {
       const res = await api.post(`/workspaces/${activeWorkspaceId}/invite`, inviteData);
       return res.data;
     },
-    {
-      onSuccess: () => {
-        queryClient.invalidateQueries(['workspace', activeWorkspaceId]);
-        setInviteEmail('');
-        alert('User invited successfully!');
-      },
-      onError: (error: any) => {
-        alert(error.response?.data?.message || 'Failed to invite user');
-      }
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['workspace', activeWorkspaceId] });
+      setInviteEmail('');
+      alert('User invited successfully!');
+    },
+    onError: (error: any) => {
+      alert(error.response?.data?.message || 'Failed to invite user');
     }
-  );
+  });
 
   const handleInvite = (e: React.FormEvent) => {
     e.preventDefault();
@@ -122,10 +123,10 @@ const Team = () => {
             </div>
             <button
               type="submit"
-              disabled={inviteMutation.isLoading}
+              disabled={inviteMutation.isPending}
               className="inline-flex items-center justify-center px-4 py-2 border border-transparent shadow-sm text-sm font-medium rounded-lg text-white bg-primary-600 hover:bg-primary-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-primary-500 disabled:opacity-50"
             >
-              {inviteMutation.isLoading ? <Loader2 className="w-5 h-5 animate-spin" /> : <Plus className="w-5 h-5 mr-2" />}
+              {inviteMutation.isPending ? <Loader2 className="w-5 h-5 animate-spin" /> : <Plus className="w-5 h-5 mr-2" />}
               Invite
             </button>
           </form>

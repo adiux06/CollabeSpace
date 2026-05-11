@@ -3,7 +3,7 @@ import { motion, AnimatePresence } from 'framer-motion';
 import { MessageSquare, X, Send, Sparkles, Bot, User, Minimize2 } from 'lucide-react';
 import { chatWithAI } from '../../api/taskApi';
 import api from '../../api/client';
-import { useQuery } from 'react-query';
+import { useQuery } from '@tanstack/react-query';
 
 interface Message {
   role: 'user' | 'assistant';
@@ -21,9 +21,12 @@ const AIChatBot = () => {
   const messagesEndRef = useRef<HTMLDivElement>(null);
 
   // Fetch current workspace ID
-  const { data: workspaces } = useQuery('workspaces', async () => {
-    const res = await api.get('/workspaces');
-    return res.data;
+  const { data: workspaces } = useQuery({
+    queryKey: ['workspaces'],
+    queryFn: async () => {
+      const res = await api.get('/workspaces');
+      return res.data;
+    }
   });
   const workspaceId = workspaces && workspaces.length > 0 ? workspaces[0]._id : null;
 

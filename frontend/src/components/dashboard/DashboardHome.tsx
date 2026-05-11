@@ -1,5 +1,5 @@
 import { useState, useEffect } from 'react';
-import { useQuery, useMutation, useQueryClient } from 'react-query';
+import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { Plus } from 'lucide-react';
 import { useAuthStore } from '../../store/authStore';
 import { useUIStore } from '../../store/uiStore';
@@ -23,28 +23,27 @@ const DashboardHome = () => {
   const [showConfirmDelete, setShowConfirmDelete] = useState(false);
   
   // Fetch user workspaces
-  const { data: workspaces, error: workspaceError, isLoading: workspacesLoading } = useQuery(
-    'workspaces',
-    async () => {
+  const { data: workspaces, error: workspaceError, isLoading: workspacesLoading } = useQuery({
+    queryKey: ['workspaces'],
+    queryFn: async () => {
       const res = await api.get('/workspaces');
       return res.data;
     },
-    { enabled: isAuthenticated }
-  );
+    enabled: isAuthenticated
+  });
 
   const workspaceId = workspaces && workspaces.length > 0 ? workspaces[0]._id : null;
 
-  const { data: tasks = [], isLoading } = useQuery(
-    ['tasks', workspaceId],
-    () => fetchTasks(workspaceId as string),
-    {
-      enabled: !!workspaceId,
-    }
-  );
+  const { data: tasks = [], isLoading } = useQuery({
+    queryKey: ['tasks', workspaceId],
+    queryFn: () => fetchTasks(workspaceId as string),
+    enabled: !!workspaceId,
+  });
 
-  const createMutation = useMutation(createTask, {
+  const createMutation = useMutation({
+    mutationFn: createTask,
     onSuccess: () => {
-      queryClient.invalidateQueries(['tasks', workspaceId]);
+      queryClient.invalidateQueries({ queryKey: ['tasks', workspaceId] });
       setIsModalOpen(false);
     },
     onError: (error: any) => {
@@ -53,65 +52,59 @@ const DashboardHome = () => {
     }
   });
 
-  const editMutation = useMutation(
-    (data: { id: string; updates: Partial<Task> }) => updateTask(data.id, data.updates),
-    {
-      onSuccess: () => {
-        queryClient.invalidateQueries(['tasks', workspaceId]);
-        setEditingTask(null);
-        toast.success('Task updated successfully');
-      },
-      onError: (error: any) => {
-        console.error(error);
-        toast.error(`Failed to update task: ${error.response?.data?.message || error.message}`);
-      }
+  const editMutation = useMutation({
+    mutationFn: (data: { id: string; updates: Partial<Task> }) => updateTask(data.id, data.updates),
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['tasks', workspaceId] });
+      setEditingTask(null);
+      toast.success('Task updated successfully');
+    },
+    onError: (error: any) => {
+      console.error(error);
+      toast.error(`Failed to update task: ${error.response?.data?.message || error.message}`);
     }
-  );
+  });
   
-  const duplicateMutation = useMutation(
-    (id: string) => duplicateTask(id, workspaceId as string),
-    {
-      onSuccess: () => {
-        queryClient.invalidateQueries(['tasks', workspaceId]);
-        setEditingTask(null);
-        toast.success('Task duplicated');
-      },
-      onError: (error: any) => {
-        console.error(error);
-        toast.error(`Failed to duplicate task: ${error.response?.data?.message || error.message}`);
-      }
+  const duplicateMutation = useMutation({
+    mutationFn: (id: string) => duplicateTask(id, workspaceId as string),
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['tasks', workspaceId] });
+      setEditingTask(null);
+      toast.success('Task duplicated');
+    },
+    onError: (error: any) => {
+      console.error(error);
+      toast.error(`Failed to duplicate task: ${error.response?.data?.message || error.message}`);
     }
-  );
+  });
 
-  const deleteMutation = useMutation(
-    (id: string) => deleteTask({ id, workspaceId: workspaceId as string }),
-    {
-      onSuccess: () => {
-        queryClient.invalidateQueries(['tasks', workspaceId]);
-        setEditingTask(null);
-        toast.success('Task deleted successfully');
-      },
-      onError: (error: any) => {
-        console.error(error);
-        toast.error(`Failed to delete task: ${error.response?.data?.message || error.message}`);
-      }
+  const deleteMutation = useMutation({
+    mutationFn: (id: string) => deleteTask({ id, workspaceId: workspaceId as string }),
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['tasks', workspaceId] });
+      setEditingTask(null);
+      toast.success('Task deleted successfully');
+    },
+    onError: (error: any) => {
+      console.error(error);
+      toast.error(`Failed to delete task: ${error.response?.data?.message || error.message}`);
     }
-  );
+  });
 
   // Handle Real-time socket events
   useEffect(() => {
     if (!socket) return;
     
     socket.on('task-created', () => {
-      queryClient.invalidateQueries(['tasks', workspaceId]);
+      queryClient.invalidateQueries({ queryKey: ['tasks', workspaceId] });
     });
     
     socket.on('task-updated', () => {
-      queryClient.invalidateQueries(['tasks', workspaceId]);
+      queryClient.invalidateQueries({ queryKey: ['tasks', workspaceId] });
     });
     
     socket.on('task-moved', () => {
-      queryClient.invalidateQueries(['tasks', workspaceId]);
+      queryClient.invalidateQueries({ queryKey: ['tasks', workspaceId] });
     });
 
     return () => {
@@ -238,7 +231,7 @@ const DashboardHome = () => {
           isOpen={isModalOpen}
           onClose={() => setIsModalOpen(false)}
           onSubmit={handleCreateTask}
-          isSubmitting={createMutation.isLoading}
+          isSubmitting={createMutation.isPending}
         />
 
         <EditTaskModal
@@ -248,7 +241,7 @@ const DashboardHome = () => {
           onSubmit={handleUpdateTask}
           onDelete={handleDeleteTask}
           onDuplicate={handleDuplicateTask}
-          isSubmitting={editMutation.isLoading || duplicateMutation.isLoading}
+          isSubmitting={editMutation.isPending || duplicateMutation.isPending}
         />
 
         <ConfirmModal

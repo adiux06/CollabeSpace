@@ -1,15 +1,17 @@
 import React, { useState } from 'react';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { motion } from 'framer-motion';
-import { Mail, Shield, User as UserIcon, Loader2, Plus, Users } from 'lucide-react';
+import { Mail, Shield, User as UserIcon, Loader2, Plus, Users, Layout, Sparkles } from 'lucide-react';
 import api from '../../api/client';
 import { useAuthStore } from '../../store/authStore';
+import TeamDiscussion from './TeamDiscussion';
 
 const Team = () => {
   const { user, activeWorkspace } = useAuthStore();
   const queryClient = useQueryClient();
   const [inviteEmail, setInviteEmail] = useState('');
   const [inviteRole, setInviteRole] = useState('member');
+  const [activeTab, setActiveTab] = useState<'members' | 'discussion'>('members');
 
   const activeWorkspaceId = activeWorkspace?._id;
 
@@ -97,14 +99,105 @@ const Team = () => {
       animate={{ opacity: 1, y: 0 }}
       className="max-w-4xl mx-auto space-y-8"
     >
-      <div>
-        <h1 className="text-2xl font-bold text-gray-900 dark:text-white flex items-center">
-          <Users className="w-6 h-6 mr-2 text-primary-500" />
-          Team Management
-        </h1>
-        <p className="mt-1 text-sm text-gray-500 dark:text-gray-400">
-          Manage members for <strong>{workspace.name}</strong>
-        </p>
+      <div className="flex flex-col md:flex-row md:items-center justify-between gap-4">
+        <div>
+          <h1 className="text-2xl font-bold text-gray-900 dark:text-white flex items-center">
+            <Users className="w-6 h-6 mr-2 text-primary-500" />
+            Team Management
+          </h1>
+          <p className="mt-1 text-sm text-gray-500 dark:text-gray-400">
+            Manage and collaborate in <strong>{workspace.name}</strong>
+          </p>
+        </div>
+        
+        {/* Tabs */}
+        <div className="flex bg-gray-100 dark:bg-dark-bg p-1 rounded-xl border border-gray-200 dark:border-dark-border">
+          <button
+            onClick={() => setActiveTab('members')}
+            className={`px-4 py-2 text-sm font-medium rounded-lg transition-all ${
+              activeTab === 'members'
+                ? 'bg-white dark:bg-dark-card text-primary-600 dark:text-primary-400 shadow-sm'
+                : 'text-gray-500 dark:text-gray-400 hover:text-gray-700 dark:hover:text-gray-200'
+            }`}
+          >
+            Members
+          </button>
+          <button
+            onClick={() => setActiveTab('discussion')}
+            className={`px-4 py-2 text-sm font-medium rounded-lg transition-all ${
+              activeTab === 'discussion'
+                ? 'bg-white dark:bg-dark-card text-primary-600 dark:text-primary-400 shadow-sm'
+                : 'text-gray-500 dark:text-gray-400 hover:text-gray-700 dark:hover:text-gray-200'
+            }`}
+          >
+            Discussion
+          </button>
+        </div>
+      </div>
+
+      <AnimatePresence mode="wait">
+        {activeTab === 'members' ? (
+          <motion.div
+            key="members"
+            initial={{ opacity: 0, x: -20 }}
+            animate={{ opacity: 1, x: 0 }}
+            exit={{ opacity: 0, x: 20 }}
+            className="space-y-8"
+          >
+
+      {/* Team Capabilities Section */}
+      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
+        <motion.div 
+          whileHover={{ y: -5 }}
+          className="glass-panel p-6 rounded-2xl border border-primary-100/20 dark:border-primary-900/20"
+        >
+          <div className="w-10 h-10 rounded-xl bg-primary-100 dark:bg-primary-900/30 flex items-center justify-center text-primary-600 dark:text-primary-400 mb-4">
+            <Users className="w-6 h-6" />
+          </div>
+          <h3 className="font-bold text-gray-900 dark:text-white mb-2 text-base">Invite & Grow</h3>
+          <p className="text-xs text-gray-500 dark:text-gray-400 leading-relaxed">
+            Invite your colleagues to join your workspace and start collaborating on projects together.
+          </p>
+        </motion.div>
+
+        <motion.div 
+          whileHover={{ y: -5 }}
+          className="glass-panel p-6 rounded-2xl border border-blue-100/20 dark:border-blue-900/20"
+        >
+          <div className="w-10 h-10 rounded-xl bg-blue-100 dark:bg-blue-900/30 flex items-center justify-center text-blue-600 dark:text-blue-400 mb-4">
+            <Shield className="w-6 h-6" />
+          </div>
+          <h3 className="font-bold text-gray-900 dark:text-white mb-2 text-base">Role Control</h3>
+          <p className="text-xs text-gray-500 dark:text-gray-400 leading-relaxed">
+            Admins can manage permissions, ensuring everyone has the right level of access to the workspace.
+          </p>
+        </motion.div>
+
+        <motion.div 
+          whileHover={{ y: -5 }}
+          className="glass-panel p-6 rounded-2xl border border-purple-100/20 dark:border-purple-900/20"
+        >
+          <div className="w-10 h-10 rounded-xl bg-purple-100 dark:bg-purple-900/30 flex items-center justify-center text-purple-600 dark:text-purple-400 mb-4">
+            <Layout className="w-6 h-6" />
+          </div>
+          <h3 className="font-bold text-gray-900 dark:text-white mb-2 text-base">Task Ownership</h3>
+          <p className="text-xs text-gray-500 dark:text-gray-400 leading-relaxed">
+            Assign tasks to specific team members to keep everyone accountable and track progress.
+          </p>
+        </motion.div>
+
+        <motion.div 
+          whileHover={{ y: -5 }}
+          className="glass-panel p-6 rounded-2xl border border-amber-100/20 dark:border-amber-900/20"
+        >
+          <div className="w-10 h-10 rounded-xl bg-amber-100 dark:bg-amber-900/30 flex items-center justify-center text-amber-600 dark:text-amber-400 mb-4">
+            <Sparkles className="w-6 h-6" />
+          </div>
+          <h3 className="font-bold text-gray-900 dark:text-white mb-2 text-base">AI Assistant</h3>
+          <p className="text-xs text-gray-500 dark:text-gray-400 leading-relaxed">
+            Get help from CollabSpace AI to break down tasks, prioritize work, and optimize your team's workflow.
+          </p>
+        </motion.div>
       </div>
 
       {isAdmin && (
@@ -214,6 +307,18 @@ const Team = () => {
           ))}
         </ul>
       </div>
+          </motion.div>
+        ) : (
+          <motion.div
+            key="discussion"
+            initial={{ opacity: 0, x: 20 }}
+            animate={{ opacity: 1, x: 0 }}
+            exit={{ opacity: 0, x: -20 }}
+          >
+            <TeamDiscussion workspaceId={activeWorkspaceId as string} />
+          </motion.div>
+        )}
+      </AnimatePresence>
     </motion.div>
   );
 };

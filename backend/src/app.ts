@@ -7,6 +7,7 @@ import authRoutes from './routes/authRoutes';
 import workspaceRoutes from './routes/workspaceRoutes';
 import taskRoutes from './routes/taskRoutes';
 import commentRoutes from './routes/commentRoutes';
+import messageRoutes from './routes/messageRoutes';
 import aiRoutes from './routes/aiRoutes';
 
 const app: Application = express();
@@ -49,6 +50,7 @@ app.use('/api/auth', authRoutes);
 app.use('/api/workspaces', workspaceRoutes);
 app.use('/api/tasks', taskRoutes);
 app.use('/api/comments', commentRoutes);
+app.use('/api/messages', messageRoutes);
 app.use('/api/ai', aiRoutes);
 
 // Basic route

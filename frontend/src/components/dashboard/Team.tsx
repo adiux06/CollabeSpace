@@ -14,6 +14,27 @@ const Team = () => {
   const [activeTab, setActiveTab] = useState<'members' | 'discussion'>('members');
 
   const activeWorkspaceId = activeWorkspace?._id;
+  const [onlineUsers, setOnlineUsers] = useState<{ userId: string, userName: string }[]>([]);
+
+  // Handle presence
+  useEffect(() => {
+    if (!socket || !activeWorkspaceId || !user) return;
+
+    socket.emit('join-workspace', { 
+      workspaceId: activeWorkspaceId, 
+      userId: user._id, 
+      userName: user.name 
+    });
+
+    socket.on('presence-update', (users: any) => {
+      setOnlineUsers(users);
+    });
+
+    return () => {
+      socket.emit('leave-workspace', activeWorkspaceId);
+      socket.off('presence-update');
+    };
+  }, [socket, activeWorkspaceId, user]);
 
   // Fetch detailed workspace including populated members
   const { data: workspace, isLoading } = useQuery({
@@ -110,6 +131,25 @@ const Team = () => {
           </p>
         </div>
         
+        {/* Presence Indicators */}
+        <div className="flex -space-x-2">
+          {onlineUsers.map((u, i) => (
+            <div 
+              key={u.userId} 
+              title={`${u.userName} (Online)`}
+              className="relative"
+            >
+              <div className="h-8 w-8 rounded-full bg-primary-100 dark:bg-primary-900/30 border-2 border-white dark:border-dark-bg flex items-center justify-center text-primary-700 dark:text-primary-400 font-bold text-xs">
+                {u.userName.charAt(0).toUpperCase()}
+              </div>
+              <div className="absolute bottom-0 right-0 h-2.5 w-2.5 bg-green-500 border-2 border-white dark:border-dark-bg rounded-full"></div>
+            </div>
+          ))}
+          {onlineUsers.length === 0 && (
+            <span className="text-xs text-gray-400 italic flex items-center ml-2">No others online</span>
+          )}
+        </div>
+
         {/* Tabs */}
         <div className="flex bg-gray-100 dark:bg-dark-bg p-1 rounded-xl border border-gray-200 dark:border-dark-border">
           <button

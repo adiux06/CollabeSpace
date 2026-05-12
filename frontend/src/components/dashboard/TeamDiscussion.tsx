@@ -44,10 +44,40 @@ const TeamDiscussion = ({ workspaceId }: { workspaceId: string }) => {
       }
     });
 
+    socket.on('user-typing', ({ userId, userName }: any) => {
+      if (userId !== user?._id) {
+        setTypingUsers(prev => ({ ...prev, [userId]: userName }));
+      }
+    });
+
+    socket.on('user-stop-typing', ({ userId }: any) => {
+      setTypingUsers(prev => {
+        const next = { ...prev };
+        delete next[userId];
+        return next;
+      });
+    });
+
     return () => {
       socket.off('new-message');
+      socket.off('user-typing');
+      socket.off('user-stop-typing');
     };
-  }, [socket, workspaceId, queryClient]);
+  }, [socket, workspaceId, queryClient, user]);
+
+  const handleTyping = (e: React.ChangeEvent<HTMLInputElement>) => {
+    setMessageText(e.target.value);
+
+    if (!socket || !workspaceId || !user) return;
+
+    socket.emit('typing', { workspaceId, userId: user._id, userName: user.name });
+
+    if (typingTimeoutRef.current) clearTimeout(typingTimeoutRef.current);
+    
+    typingTimeoutRef.current = setTimeout(() => {
+      socket.emit('stop-typing', { workspaceId, userId: user._id });
+    }, 2000);
+  };
 
   // Scroll to bottom on new messages
   useEffect(() => {
@@ -116,6 +146,16 @@ const TeamDiscussion = ({ workspaceId }: { workspaceId: string }) => {
             </motion.div>
           ))
         )}
+        {Object.values(typingUsers).length > 0 && (
+          <div className="flex items-center space-x-2 text-[10px] text-gray-500 italic animate-pulse">
+            <div className="flex space-x-1">
+              <div className="w-1 h-1 bg-gray-400 rounded-full animate-bounce" style={{ animationDelay: '0ms' }}></div>
+              <div className="w-1 h-1 bg-gray-400 rounded-full animate-bounce" style={{ animationDelay: '150ms' }}></div>
+              <div className="w-1 h-1 bg-gray-400 rounded-full animate-bounce" style={{ animationDelay: '300ms' }}></div>
+            </div>
+            <span>{Object.values(typingUsers).join(', ')} {Object.values(typingUsers).length > 1 ? 'are' : 'is'} typing...</span>
+          </div>
+        )}
         <div ref={messagesEndRef} />
       </div>
 
@@ -124,7 +164,7 @@ const TeamDiscussion = ({ workspaceId }: { workspaceId: string }) => {
           <input
             type="text"
             value={messageText}
-            onChange={(e) => setMessageText(e.target.value)}
+            onChange={handleTyping}
             placeholder="Type a message..."
             className="w-full pl-4 pr-12 py-3 bg-white dark:bg-dark-card border border-gray-200 dark:border-dark-border rounded-xl text-sm focus:ring-2 focus:ring-primary-500 outline-none transition-all shadow-sm dark:text-white"
           />

@@ -21,30 +21,54 @@ const startServer = async () => {
     },
   });
 
+  const workspaceUsers: Record<string, Set<string>> = {};
+
   io.on('connection', (socket) => {
     console.log(`User connected: ${socket.id}`);
 
-    socket.on('join-workspace', (workspaceId) => {
+    socket.on('join-workspace', ({ workspaceId, userId, userName }) => {
       socket.join(workspaceId);
-      console.log(`Socket ${socket.id} joined workspace ${workspaceId}`);
+      
+      // Store user info in socket object for easy access on disconnect
+      (socket as any).workspaceId = workspaceId;
+      (socket as any).userId = userId;
+      (socket as any).userName = userName;
+
+      if (!workspaceUsers[workspaceId]) {
+        workspaceUsers[workspaceId] = new Set();
+      }
+      workspaceUsers[workspaceId].add(JSON.stringify({ userId, userName }));
+
+      io.to(workspaceId).emit('presence-update', Array.from(workspaceUsers[workspaceId]).map(u => JSON.parse(u)));
+      console.log(`User ${userName} joined workspace ${workspaceId}`);
     });
 
     socket.on('leave-workspace', (workspaceId) => {
       socket.leave(workspaceId);
-      console.log(`Socket ${socket.id} left workspace ${workspaceId}`);
+      
+      if (workspaceUsers[workspaceId] && (socket as any).userId) {
+        workspaceUsers[workspaceId].delete(JSON.stringify({ 
+          userId: (socket as any).userId, 
+          userName: (socket as any).userName 
+        }));
+        io.to(workspaceId).emit('presence-update', Array.from(workspaceUsers[workspaceId]).map(u => JSON.parse(u)));
+      }
     });
 
-    socket.on('typing', ({ taskId, userId, userName }) => {
-      // Find which room (workspace) this socket is in
-      const rooms = Array.from(socket.rooms);
-      rooms.forEach(room => {
-        if (room !== socket.id) {
-          socket.to(room).emit('user-typing', { taskId, userId, userName });
-        }
-      });
+    socket.on('typing', ({ workspaceId, userId, userName }) => {
+      socket.to(workspaceId).emit('user-typing', { userId, userName });
+    });
+
+    socket.on('stop-typing', ({ workspaceId, userId }) => {
+      socket.to(workspaceId).emit('user-stop-typing', { userId });
     });
 
     socket.on('disconnect', () => {
+      const { workspaceId, userId, userName } = (socket as any);
+      if (workspaceId && workspaceUsers[workspaceId]) {
+        workspaceUsers[workspaceId].delete(JSON.stringify({ userId, userName }));
+        io.to(workspaceId).emit('presence-update', Array.from(workspaceUsers[workspaceId]).map(u => JSON.parse(u)));
+      }
       console.log(`User disconnected: ${socket.id}`);
     });
   });

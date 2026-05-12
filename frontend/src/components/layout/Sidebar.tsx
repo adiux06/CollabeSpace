@@ -3,6 +3,7 @@ import { NavLink } from 'react-router-dom';
 import { LayoutDashboard, CheckSquare, Users, Settings, LogOut } from 'lucide-react';
 import { useAuthStore } from '../../store/authStore';
 import { useUIStore } from '../../store/uiStore';
+import WorkspaceSwitcher from './WorkspaceSwitcher';
 
 const Sidebar = () => {
   const { logout, isAuthenticated } = useAuthStore();
@@ -25,6 +26,7 @@ const Sidebar = () => {
   return (
     <div className="h-full bg-white dark:bg-dark-card border-r border-gray-200 dark:border-dark-border flex flex-col transition-colors duration-200">
       <div className="flex-1 overflow-y-auto py-4 custom-scrollbar">
+        {sidebarOpen && <WorkspaceSwitcher />}
         <nav className="px-2 space-y-1">
           {navigation.map((item) => (
             <NavLink

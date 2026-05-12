@@ -14,7 +14,7 @@ import { useSocket } from '../../contexts/SocketContext';
 import type { Task } from '../../types';
 
 const DashboardHome = () => {
-  const { user, isAuthenticated } = useAuthStore();
+  const { user, isAuthenticated, activeWorkspace } = useAuthStore();
   const { setAuthModalOpen } = useUIStore();
   const queryClient = useQueryClient();
   const { socket } = useSocket();
@@ -22,7 +22,7 @@ const DashboardHome = () => {
   const [editingTask, setEditingTask] = useState<Task | null>(null);
   const [showConfirmDelete, setShowConfirmDelete] = useState(false);
   
-  // Fetch user workspaces
+  // Fetch user workspaces to keep list fresh
   const { data: workspaces, error: workspaceError, isLoading: workspacesLoading } = useQuery({
     queryKey: ['workspaces'],
     queryFn: async () => {
@@ -32,7 +32,7 @@ const DashboardHome = () => {
     enabled: isAuthenticated
   });
 
-  const workspaceId = workspaces && workspaces.length > 0 ? workspaces[0]._id : null;
+  const workspaceId = activeWorkspace?._id || (workspaces && workspaces.length > 0 ? workspaces[0]._id : null);
 
   const { data: tasks = [], isLoading } = useQuery({
     queryKey: ['tasks', workspaceId],

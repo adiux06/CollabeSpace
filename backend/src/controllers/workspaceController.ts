@@ -79,3 +79,66 @@ export const inviteMember = async (req: Request, res: Response, next: NextFuncti
     next(error);
   }
 };
+
+export const updateMemberRole = async (req: Request, res: Response, next: NextFunction) => {
+  try {
+    const { workspaceId, userId } = req.params;
+    const { role } = req.body;
+
+    const workspace = await Workspace.findById(workspaceId);
+    if (!workspace) {
+      return next(new AppError('Workspace not found', 404));
+    }
+
+    const memberIndex = workspace.members.findIndex(m => m.userId.toString() === userId);
+    if (memberIndex === -1) {
+      return next(new AppError('Member not found in workspace', 404));
+    }
+
+    // Prevent changing the last admin's role
+    if (workspace.members[memberIndex].role === 'admin' && role !== 'admin') {
+      const adminCount = workspace.members.filter(m => m.role === 'admin').length;
+      if (adminCount <= 1) {
+        return next(new AppError('Cannot demote the last admin of the workspace', 400));
+      }
+    }
+
+    workspace.members[memberIndex].role = role;
+    await workspace.save();
+
+    res.json(workspace);
+  } catch (error) {
+    next(error);
+  }
+};
+
+export const removeMember = async (req: Request, res: Response, next: NextFunction) => {
+  try {
+    const { workspaceId, userId } = req.params;
+
+    const workspace = await Workspace.findById(workspaceId);
+    if (!workspace) {
+      return next(new AppError('Workspace not found', 404));
+    }
+
+    const memberIndex = workspace.members.findIndex(m => m.userId.toString() === userId);
+    if (memberIndex === -1) {
+      return next(new AppError('Member not found in workspace', 404));
+    }
+
+    // Prevent removing the last admin
+    if (workspace.members[memberIndex].role === 'admin') {
+      const adminCount = workspace.members.filter(m => m.role === 'admin').length;
+      if (adminCount <= 1) {
+        return next(new AppError('Cannot remove the last admin of the workspace', 400));
+      }
+    }
+
+    workspace.members.splice(memberIndex, 1);
+    await workspace.save();
+
+    res.json({ message: 'Member removed successfully', workspace });
+  } catch (error) {
+    next(error);
+  }
+};

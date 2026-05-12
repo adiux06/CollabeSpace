@@ -6,24 +6,15 @@ import api from '../../api/client';
 import { useAuthStore } from '../../store/authStore';
 
 const Team = () => {
-  const { user } = useAuthStore();
+  const { user, activeWorkspace } = useAuthStore();
   const queryClient = useQueryClient();
   const [inviteEmail, setInviteEmail] = useState('');
   const [inviteRole, setInviteRole] = useState('member');
 
-  // Fetch workspaces to get active workspace ID
-  const { data: workspaces, isLoading: wsLoading } = useQuery({
-    queryKey: ['workspaces'],
-    queryFn: async () => {
-      const res = await api.get('/workspaces');
-      return res.data;
-    }
-  });
-
-  const activeWorkspaceId = workspaces?.[0]?._id;
+  const activeWorkspaceId = activeWorkspace?._id;
 
   // Fetch detailed workspace including populated members
-  const { data: workspace, isLoading: detailsLoading } = useQuery({
+  const { data: workspace, isLoading } = useQuery({
     queryKey: ['workspace', activeWorkspaceId],
     queryFn: async () => {
       const res = await api.get(`/workspaces/${activeWorkspaceId}`);
@@ -47,13 +38,38 @@ const Team = () => {
     }
   });
 
+  const updateRoleMutation = useMutation({
+    mutationFn: async ({ userId, role }: { userId: string; role: string }) => {
+      const res = await api.patch(`/workspaces/${activeWorkspaceId}/members/${userId}`, { role });
+      return res.data;
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['workspace', activeWorkspaceId] });
+    },
+    onError: (error: any) => {
+      alert(error.response?.data?.message || 'Failed to update role');
+    }
+  });
+
+  const removeMemberMutation = useMutation({
+    mutationFn: async (userId: string) => {
+      const res = await api.delete(`/workspaces/${activeWorkspaceId}/members/${userId}`);
+      return res.data;
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['workspace', activeWorkspaceId] });
+      alert('Member removed successfully');
+    },
+    onError: (error: any) => {
+      alert(error.response?.data?.message || 'Failed to remove member');
+    }
+  });
+
   const handleInvite = (e: React.FormEvent) => {
     e.preventDefault();
     if (!inviteEmail) return;
     inviteMutation.mutate({ email: inviteEmail, role: inviteRole });
   };
-
-  const isLoading = wsLoading || detailsLoading;
 
   if (isLoading) {
     return (
@@ -156,15 +172,42 @@ const Team = () => {
                     </div>
                   </div>
                 </div>
-                <div className="flex items-center">
-                  <span className={`px-2.5 py-1 rounded-full text-xs font-medium capitalize flex items-center ${
-                    member.role === 'admin' ? 'bg-purple-100 text-purple-800 dark:bg-purple-900/30 dark:text-purple-400' :
-                    member.role === 'member' ? 'bg-blue-100 text-blue-800 dark:bg-blue-900/30 dark:text-blue-400' :
-                    'bg-gray-100 text-gray-800 dark:bg-gray-800 dark:text-gray-400'
-                  }`}>
-                    {member.role === 'admin' && <Shield className="w-3 h-3 mr-1" />}
-                    {member.role}
-                  </span>
+                
+                <div className="flex items-center space-x-4">
+                  {isAdmin && user?._id !== member.userId?._id ? (
+                    <>
+                      <select
+                        value={member.role}
+                        onChange={(e) => updateRoleMutation.mutate({ userId: member.userId._id, role: e.target.value })}
+                        disabled={updateRoleMutation.isPending}
+                        className="text-xs border-gray-300 dark:border-dark-border dark:bg-dark-bg dark:text-white rounded-md focus:ring-primary-500"
+                      >
+                        <option value="member">Member</option>
+                        <option value="admin">Admin</option>
+                        <option value="viewer">Viewer</option>
+                      </select>
+                      <button
+                        onClick={() => {
+                          if (window.confirm(`Are you sure you want to remove ${member.userId?.name}?`)) {
+                            removeMemberMutation.mutate(member.userId._id);
+                          }
+                        }}
+                        disabled={removeMemberMutation.isPending}
+                        className="text-xs text-red-600 hover:text-red-800 dark:text-red-400 dark:hover:text-red-300 font-medium"
+                      >
+                        Remove
+                      </button>
+                    </>
+                  ) : (
+                    <span className={`px-2.5 py-1 rounded-full text-xs font-medium capitalize flex items-center ${
+                      member.role === 'admin' ? 'bg-purple-100 text-purple-800 dark:bg-purple-900/30 dark:text-purple-400' :
+                      member.role === 'member' ? 'bg-blue-100 text-blue-800 dark:bg-blue-900/30 dark:text-blue-400' :
+                      'bg-gray-100 text-gray-800 dark:bg-gray-800 dark:text-gray-400'
+                    }`}>
+                      {member.role === 'admin' && <Shield className="w-3 h-3 mr-1" />}
+                      {member.role}
+                    </span>
+                  )}
                 </div>
               </div>
             </li>

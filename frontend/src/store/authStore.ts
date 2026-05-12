@@ -13,7 +13,7 @@ interface AuthState {
 export const useAuthStore = create<AuthState>((set) => ({
   user: JSON.parse(localStorage.getItem('user') || 'null'),
   isAuthenticated: !!localStorage.getItem('accessToken') || !!localStorage.getItem('user'),
-  activeWorkspace: null,
+  activeWorkspace: JSON.parse(localStorage.getItem('activeWorkspace') || 'null'),
   setUser: (user) => {
     if (user) {
       localStorage.setItem('user', JSON.stringify(user));
@@ -22,7 +22,14 @@ export const useAuthStore = create<AuthState>((set) => ({
     }
     set({ user, isAuthenticated: !!user });
   },
-  setActiveWorkspace: (workspace) => set({ activeWorkspace: workspace }),
+  setActiveWorkspace: (workspace) => {
+    if (workspace) {
+      localStorage.setItem('activeWorkspace', JSON.stringify(workspace));
+    } else {
+      localStorage.removeItem('activeWorkspace');
+    }
+    set({ activeWorkspace: workspace });
+  },
   logout: () => {
     localStorage.removeItem('accessToken');
     localStorage.removeItem('refreshToken');

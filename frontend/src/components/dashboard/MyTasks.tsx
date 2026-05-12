@@ -10,7 +10,8 @@ import {
   ChevronRight,
   Layout,
   List as ListIcon,
-  Search
+  Search,
+  Briefcase
 } from 'lucide-react';
 import { fetchMyTasks, updateTask, deleteTask, duplicateTask } from '../../api/taskApi';
 import EditTaskModal from '../kanban/EditTaskModal';
@@ -293,16 +294,20 @@ const MyTasks = () => {
                     </p>
 
                     <div className="flex flex-wrap gap-2 mb-6 h-[24px] overflow-hidden">
-                      {task.tags?.length > 0 ? (
-                        task.tags.slice(0, 2).map((tag: string, index: number) => (
+                      {task.workspaceId && (
+                        <span className="flex items-center px-2 py-0.5 bg-primary-50 dark:bg-primary-900/20 text-primary-600 dark:text-primary-400 text-[10px] font-bold rounded-md border border-primary-100 dark:border-primary-900/30">
+                          <Briefcase className="w-3 h-3 mr-1" />
+                          {task.workspaceId.name}
+                        </span>
+                      )}
+                      {task.tags?.length > 0 && 
+                        task.tags.slice(0, 1).map((tag: string, index: number) => (
                           <span key={index} className="flex items-center px-2 py-0.5 bg-gray-100 dark:bg-dark-bg text-gray-600 dark:text-gray-400 text-[10px] font-bold rounded-md border border-gray-200 dark:border-dark-border">
                             <Tag className="w-3 h-3 mr-1" />
                             {tag}
                           </span>
                         ))
-                      ) : (
-                        <span className="text-[10px] text-gray-400 dark:text-gray-600 italic">No tags</span>
-                      )}
+                      }
                     </div>
 
                     <div className="flex items-center justify-between pt-4 border-t border-gray-100 dark:border-dark-border">
@@ -351,6 +356,12 @@ const MyTasks = () => {
                       {task.title}
                     </h3>
                     <div className="flex items-center gap-4 mt-1">
+                      {task.workspaceId && (
+                        <div className="flex items-center text-[10px] text-primary-500 font-bold uppercase tracking-wider">
+                          <Briefcase className="w-3 h-3 mr-1" />
+                          {task.workspaceId.name}
+                        </div>
+                      )}
                       <div className="flex items-center text-[10px] text-gray-400">
                         <Calendar className="w-3 h-3 mr-1" />
                         {task.dueDate ? new Date(task.dueDate).toLocaleDateString() : 'No date'}

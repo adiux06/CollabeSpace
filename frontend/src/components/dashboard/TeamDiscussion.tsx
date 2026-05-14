@@ -12,7 +12,9 @@ const TeamDiscussion = ({ workspaceId }: { workspaceId: string }) => {
   const queryClient = useQueryClient();
   const { socket } = useSocket();
   const [messageText, setMessageText] = useState('');
+  const [typingUsers, setTypingUsers] = useState<Record<string, string>>({});
   const messagesEndRef = useRef<HTMLDivElement>(null);
+  const typingTimeoutRef = useRef<NodeJS.Timeout | null>(null);
 
   const { data: messages = [], isLoading } = useQuery({
     queryKey: ['messages', workspaceId],

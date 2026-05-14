@@ -1,13 +1,15 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
-import { motion } from 'framer-motion';
+import { motion, AnimatePresence } from 'framer-motion';
 import { Mail, Shield, User as UserIcon, Loader2, Plus, Users, Layout, Sparkles } from 'lucide-react';
 import api from '../../api/client';
 import { useAuthStore } from '../../store/authStore';
+import { useSocket } from '../../contexts/SocketContext';
 import TeamDiscussion from './TeamDiscussion';
 
 const Team = () => {
   const { user, activeWorkspace } = useAuthStore();
+  const { socket } = useSocket();
   const queryClient = useQueryClient();
   const [inviteEmail, setInviteEmail] = useState('');
   const [inviteRole, setInviteRole] = useState('member');
